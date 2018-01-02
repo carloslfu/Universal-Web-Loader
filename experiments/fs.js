@@ -56,6 +56,7 @@ const createKV = name => {
   const kv = {}
 
   return {
+    kv,
     get: (key) => {
       let obj = kv[key]
       return Promise.resolve(obj)
@@ -89,24 +90,28 @@ const getName = path => {
   return parts[parts.length - 1]
 }
 
+exports.getName = getName
+
 const getPath = path => {
   let parts = path.split('/')
   return parts.slice(0, parts.length - 1).join('/')
 }
 
+exports.getPath = getPath
+
 exports.read = async name => {
   let normName = path.normalize(name)
   try {
-    return (await files.get(normName)).contents
+    let file = await files.get(normName)
+    return file.contents
   } catch (err) {
     throw err
   }
 }
 
 exports.write = async (name, obj, stat = {}) => {
-  await createPathAddStats(getPath(name), stat)
   let normName = path.normalize(name)
-  console.log(name, normName)
+  await createPathAddStats(getPath(normName), stat)
   return await files.set(normName, {
     contents: obj,
     ...stat,
@@ -125,7 +130,6 @@ const createPathAddStats = async (pathName, stat) => {
   let parts = path.normalize(pathName).split('/')
   for (let i = 0, part, str = ''; part = parts[i]; i++) {
     str += (i === 0 ? '' : '/') + part
-    console.log(str)
     let exist = await exports.exists(str)
     let dir = await files.get(str)
     await files.set(str, {

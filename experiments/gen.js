@@ -1,11 +1,11 @@
 /**
  * Copyright 2016 Alexis Vincent (http://alexisvincent.io)
  */
+// Modified by Carlos Galarza <carloslfu@gmail.com>
 const path = require('./path')
 const fs = require('./fs')
 const { filterAsync } = require('./asyncFns')
 const _ = require('lodash')
-const {convertPackage} = require('jspm-npm/lib/node-conversion')
 
 const nodeCoreModules = [
     'assert',
@@ -43,17 +43,20 @@ const nodeCoreModules = [
     'zlib'
 ]
 
-const log = obj => console.log(inspect(obj, {depth: null}))
-
 /**
  * Get all directories in a directory
  * @param srcpath
  * @returns {Promise.<*>}
  */
 const getDirectories = (srcpath) => {
-  return fs.list(srcpath).then(
+  return fs.list(srcpath)
+    .then(x => {
+      debugger
+      return Promise.resolve(x)
+    })
+    .then(
     dirs => filterAsync(dirs, async file =>
-      await fs.stat(path.join(srcpath, file)).isDirectory
+      (await fs.stat(path.join(srcpath, file))).dir
     )
   ).then(dirs => {
     return Promise.all(dirs.map(async dir => {
@@ -77,7 +80,8 @@ const getDirectories = (srcpath) => {
  * @returns {Promise.<TResult>}
  */
 const getPackageConfig = dir => {
-  return fs.read(path.join(dir, 'package.json'))
+  dir = !dir || dir === '.' ? 'package.json' : path.join('node_modules', dir, 'package.json')
+  return fs.read(dir)
     .then(JSON.parse)
     // Pad it with defaults
     .then(config => Object.assign({
@@ -95,11 +99,11 @@ const getPackageConfig = dir => {
  * @returns {Promise.<TResult>}
  */
 const getOwnDeps = packageDir => {
-  const node_modules = path.join(packageDir, 'node_modules')
-
+  const node_modules = path.join('node_modules', packageDir === '.' || !packageDir ? '' : packageDir)
+  debugger
   return getDirectories(node_modules)
     // Map directories to their package.json
-    .then(dirs => Promise.all(dirs.map(dir => getPackageConfig(path.join(packageDir, 'node_modules', dir)))))
+    .then(dirs => Promise.all(dirs.map(dir => getPackageConfig(path.join(packageDir, dir)))))
     // Filter out anything that wasn't a package
     .then(configs => configs.filter((v, k) => v))
     .catch(err => {
@@ -139,47 +143,23 @@ const getOwnDeps = packageDir => {
  * @param registry
  * @returns {Promise.<{tree: *, registry: Array}>}
  */
-const traceModuleTree = (directory, name = false, version = false, registry = {}) => {
-
-    return Promise.resolve({name, version})
-    // Resolve the package.json and set name and version from there if either is not specified
-        .then(({name, version}) => (!name || !version) ? getPackageConfig(directory) : {name, version})
-
-        .then(({name, version}) => (
-
-            // Get the dependencies in node_modules
-            getOwnDeps(directory)
-
-            // Merge package { name@version : package.json } into the registry
-                .then(ownDeps => {
-                    // console.log(ownDeps)
-                    ownDeps.forEach((dep => {
-                        const versionName = dep.name + '@' + dep.version
-                        registry[versionName] = {
-                            name: dep.name,
-                            config: dep,
-                            key: versionName,
-                            location: path.join(directory, 'node_modules', dep.name)
-                        }
-                    }))
-
-                    return ownDeps
-                })
-
-                .then(ownDeps => {
-                    // map each package.json to it's own tree
-                    return Promise.all(ownDeps.map(({name, version}) => {
-                        return traceModuleTree(path.join(directory, 'node_modules', name), name, version, registry)
-                        // Drop the registry
-                            .then(({tree, registry}) => tree)
-                        // map the module and its dep list to a tree entry
-                    })).then(deps => ({name, deps, version: version}))
-                })
-
-                .then(tree => ({tree, registry}))
-        ))
+const traceModules = (name = false, version = false, registry = {}) => {
+  debugger
+  return getOwnDeps(name)
+    .then(ownDeps => {
+      ownDeps.forEach((dep => {
+        const versionName = dep.name + '@' + dep.version
+        registry[versionName] = {
+            name: dep.name,
+            config: dep,
+            key: versionName,
+            location: path.join(name, 'node_modules', dep.name)
+        }
+      }))
+      return ownDeps
+    })
+    .then(tree => ({tree, registry}))
 }
-
 
 /**
  * Take an array of objects and turn it into an object with the key being the specified key.
@@ -385,20 +365,50 @@ const dehydrateCache = () => {
 
 /// ---------------
 
-;(async () => {
-  require('es6-promise').polyfill()
-  require('isomorphic-fetch')
-  let src = await fetch('https://unpkg.com/left-pad').then(r => r.text())
-  await fs.write('node_modules/left-pad/package.json', src)
-  let list = await fs.list()
-  debugger
+require('es6-promise').polyfill()
+require('isomorphic-fetch')
 
-})()
+// Unpkg dowload
+const downloadDir = async (name) => {
+  let meta = await fetch(`https://unpkg.com/${name}/?meta`).then(r => r.json())
+  let files = meta.files
+  await Promise.all(files.map(async file => {
+    let filePath = `${name}/${fs.getName(file.path)}`
+    if (file.type === 'file') {
+      let src = await fetch(`https://unpkg.com/${filePath}`).then(r => r.text())
+      delete file.path
+      delete file.type
+      delete file.integrity
+      await fs.write(`node_modules/${filePath}`, src, file)
+      console.log(`node_modules/${filePath}`)
+    } else {
+      // Directory
+      await downloadDir(`${filePath}`, 'node_modules')
+    }
+  }))
+}
 
+exports.getConfig =  async deps => {
 
-// traceModuleTree('.')
-//     // .then(fromCache)
-//     // .then(toCache)
-//     .then(pruneModuleTree)
-//     .then(generateConfig)
-//     .then(res => console.log(res))
+  const mainPkg = {
+    dependencies: {},
+  }
+
+  await Promise.all(deps.map(async dep => {
+    await downloadDir(dep)
+    let pkg = await fs.read(`node_modules/${dep}/package.json`)
+    let depPkg = JSON.parse(pkg)
+    mainPkg.dependencies[dep] = `^${depPkg.version}`
+  }))
+  await fs.write('package.json', JSON.stringify(mainPkg, null, 2))
+
+  return traceModules('.')
+    // .then(fromCache)
+    // .then(toCache)
+    // .then(pruneModuleTree)
+    // .then(generateConfig)
+
+}
+
+exports.getConfig(['fractal-core'])
+  .then(res => console.log(res))
