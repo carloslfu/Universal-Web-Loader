@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+</head>
+<body>
+
+
+<script src="https://unpkg.com/systemjs"></script>
+<script>
+
+System.config({
+  // defaultExtension: 'js',
+  // paths: {
+  //   "node_modules/*": "*.js",
+  // },
+  // map: {
+  // },
+  // meta: {
+  //   'uni/*': {
+  //     loader: 'uni',
+  //   },
+  // }
+  "paths": {
+    "npm:": "node_modules/",
+  },
+  "map": {
+    "fractal-core": "npm:fractal-core",
+  },
+  "packages": {
+    "fractal-core": {
+        "defaultExtension": "js",
+        "main": "core/index.js",
+    }
+  },
+})
+
+let uni = function (require, exports, module) {
+
+  // exports.locate = function (arg) {
+  //   debugger
+  //   console.log('locate', arg)
+  //   let parts = arg.address.split('/')
+  //   console.log(parts[parts.length - 1])
+  //   return '_uni_loader' // parts[parts.length - 1]
+  // }
+
+  exports.fetch = function (arg) {
+    debugger
+    // console.log('fetch', arg)
+    // if ()
+    return 'module.exports.x = 123'
+    // return fetch(arg.address).then(r => r.text())
+    // return fetch('https://unpkg.com/fractal-core@4.3.8/core/index.js').then(r => r.text())
+
+  }
+
+  // exports.translate = function (arg) {
+  //   console.log('translate', arg)
+  //   return arg
+  // }
+
+  // exports.instantiate = function (arg) {
+  //   console.log('instantiate', arg)
+  //   return arg
+  // }
+
+}
+
+
+System.registerDynamic('uni', [], true, uni)
+
+async function fetchModuleFile (name) {
+  // let src = await fetch(`https://unpkg.com/${name}`).then(r => r.text())
+  // console.log(src)
+  // System.registerDynamic('uni/fractal-core', ['x'], true, function (require, exports, module) {
+  //   module.exports.x = require('x')
+  // })
+  // System.import('uni/fractal-core', 'uni/uu').then(m => {
+  //   debugger
+  //   console.log(m)
+  // })
+  System.import('fractal-core').then(m => {
+    debugger
+    console.log(m)
+  })
+}
+
+fetchModuleFile('fractal-core')
+
+// let appFn = function (require, exports, module) {
+//   module.exports = 'asd'
+// }
+
+// System.registerDynamic('app', [], true, appFn)
+
+// System.import('unpkg').then(() => {
+
+  // System.import('app').then(m => {
+  //   console.log(m)
+  // })
+// })
+
+// System.import('http://unpkg.com/fractal-core').then(m => {
+//   debugger
+//   console.log(m)
+// })
+
+</script>
+</body>
+</html>
