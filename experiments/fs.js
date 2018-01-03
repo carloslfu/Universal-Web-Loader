@@ -103,13 +103,14 @@ exports.read = async name => {
   let normName = path.normalize(name)
   try {
     let file = await files.get(normName)
-    return file.contents
+    return file ? file.contents : undefined
   } catch (err) {
     throw err
   }
 }
 
 exports.write = async (name, obj, stat = {}) => {
+  stat.size = typeof obj === 'string' ? obj.length : JSON.stringify(obj).length
   let normName = path.normalize(name)
   await createPathAddStats(getPath(normName), stat)
   return await files.set(normName, {
@@ -127,14 +128,15 @@ exports.mkdir = async (name, stat = {}) => {
 }
 
 const createPathAddStats = async (pathName, stat) => {
+  if (pathName === '') return
   let parts = path.normalize(pathName).split('/')
   for (let i = 0, part, str = ''; part = parts[i]; i++) {
     str += (i === 0 ? '' : '/') + part
-    let exist = await exports.exists(str)
     let dir = await files.get(str)
+    console.log()
     await files.set(str, {
       ...dir,
-      size: exist ? dir.size + stat.size : stat.size,
+      size: dir ? dir.size + stat.size : stat.size,
       dir: true,
     })
   }
@@ -153,7 +155,7 @@ exports.list = async name => {
   }
   return fileNames
     .filter(n => name ? n.startsWith(normName + '/') : true)
-    .map(n => name ? n.slice(name.length + 1) : n)
+    .map(n => name ? n.slice(normName.length + 1) : n)
     .filter(n => n.indexOf('/') === - 1)
 }
 
@@ -167,3 +169,5 @@ exports.exists = async name => {
   let fileNames = await exports.list()
   return fileNames.indexOf(normName) !== -1
 }
+
+exports.realpath = async path => path

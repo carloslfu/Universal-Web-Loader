@@ -4,7 +4,7 @@
   "description": "",
   "main": "fetch.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "browserify --standalone ul gen.js  -t [ babelify --plugins transform-object-rest-spread ] > ul.dist.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,7 +17,10 @@
     "idb.filesystem.js": "0.0.8",
     "isomorphic-fetch": "^2.2.1",
     "jspm-npm": "^0.30.3",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "minimatch": "^3.0.4",
+    "set-immediate-shim": "^1.0.1",
+    "systemjs-nodelibs": "^1.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

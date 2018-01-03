@@ -321,7 +321,7 @@ exports.read = async name => {
   let normName = path.normalize(name);
   try {
     let file = await files.get(normName);
-    return file.contents;
+    return file ? file.contents : undefined;
   } catch (err) {
     throw err;
   }
@@ -384,6 +384,7 @@ exports.exists = async name => {
 /**
  * Copyright 2016 Alexis Vincent (http://alexisvincent.io)
  */
+// Modified by Carlos Galarza <carloslfu@gmail.com>
 const path = require('./path');
 const fs = require('./fs');
 const { filterAsync } = require('./asyncFns');
@@ -391,15 +392,15 @@ const _ = require('lodash');
 
 const nodeCoreModules = ['assert', 'buffer', 'child_process', 'cluster', 'console', 'constants', 'crypto', 'dgram', 'dns', 'domain', 'events', 'fs', 'http', 'https', 'module', 'net', 'os', 'path', 'process', 'punycode', 'querystring', 'readline', 'repl', 'stream', 'string_decoder', 'sys', 'timers', 'tls', 'tty', 'url', 'util', 'vm', 'zlib'];
 
-const log = obj => console.log(inspect(obj, { depth: null }));
-
 /**
  * Get all directories in a directory
  * @param srcpath
  * @returns {Promise.<*>}
  */
 const getDirectories = srcpath => {
-    return fs.list(srcpath).then(dirs => filterAsync(dirs, async file => (await fs.stat(path.join(srcpath, file))).dir)).then(dirs => {
+    return fs.list(srcpath).then(x => {
+        return Promise.resolve(x);
+    }).then(dirs => filterAsync(dirs, async file => (await fs.stat(path.join(srcpath, file))).dir)).then(dirs => {
         return Promise.all(dirs.map(async dir => {
             if (dir.startsWith('@')) {
                 return getDirectories(path.join(srcpath, dir)).then(subdirs => {
@@ -431,11 +432,6 @@ const getPackageConfig = dir => {
     }, config)).catch(() => null);
 };
 
-/**
- * Return the dependencies that live in the first level of node_modules
- * @param packageDir
- * @returns {Promise.<TResult>}
- */
 const getOwnDeps = packageDir => {
     const node_modules = path.join(packageDir, 'node_modules');
 
@@ -450,36 +446,36 @@ const getOwnDeps = packageDir => {
 };
 
 /**
- * Trace the full node_modules tree, and build up a registry on the way.
- *
- * Registry is of the form:
- * {
- *    'lodash@1.1.2': {
- *      name: 'lodash',
- *      config: <the package.json file>,
- *      key: 'lodash@1.1.2',
- *      location: 'node_modules/lodash'
- *    },
- *    ...
- * }
- *
- * Returned Tree is of the form:
- * [
- *    {
- *      name: 'react',
- *      version: '15.4.1',
- *      deps: <tree, like this one>
- *    },
- *    ...
- * ]
- *
- *
- * @param directory
- * @param name
- * @param version
- * @param registry
- * @returns {Promise.<{tree: *, registry: Array}>}
- */
+* Trace the full node_modules tree, and build up a registry on the way.
+*
+* Registry is of the form:
+* {
+*    'lodash@1.1.2': {
+*      name: 'lodash',
+*      config: <the package.json file>,
+*      key: 'lodash@1.1.2',
+*      location: 'node_modules/lodash'
+*    },
+*    ...
+* }
+*
+* Returned Tree is of the form:
+* [
+*    {
+*      name: 'react',
+*      version: '15.4.1',
+*      deps: <tree, like this one>
+*    },
+*    ...
+* ]
+*
+*
+* @param directory
+* @param name
+* @param version
+* @param registry
+* @returns {Promise.<{tree: *, registry: Array}>}
+*/
 const traceModuleTree = (directory, name = false, version = false, registry = {}) => {
 
     return Promise.resolve({ name, version })
@@ -698,7 +694,7 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 // Unpkg dowload
-const downloadDir = async (name, dir = 'node_modules') => {
+const downloadDir = async name => {
     let meta = await fetch(`https://unpkg.com/${name}/?meta`).then(r => r.json());
     let files = meta.files;
     await Promise.all(files.map(async file => {
@@ -708,14 +704,21 @@ const downloadDir = async (name, dir = 'node_modules') => {
             delete file.path;
             delete file.type;
             delete file.integrity;
-            await fs.write(`${dir}/${filePath}`, src, file);
-            console.log(`${dir}/${filePath}`);
+            await fs.write(`node_modules/${filePath}`, src, file);
+            console.log(`node_modules/${filePath}`);
         } else {
             // Directory
-            await downloadDir(`${filePath}`, dir);
+            await downloadDir(`${filePath}`, 'node_modules');
         }
     }));
+    if (name.indexOf('/') === -1) {
+        // Download dependencies
+        let pkgJSON = JSON.parse((await fs.read(path.join('node_modules', name, 'package.json'))));
+        await Promise.all(Object.keys(pkgJSON.dependencies || {}).map(downloadDir));
+    }
 };
+
+exports.fs = fs;
 
 exports.getConfig = async deps => {
 
@@ -731,18 +734,11 @@ exports.getConfig = async deps => {
     }));
     await fs.write('package.json', JSON.stringify(mainPkg, null, 2));
 
-    return traceModuleTree('.')
-    // .then(fromCache)
-    // .then(toCache)
-    .then(pruneModuleTree).then(generateConfig);
+    return traceModuleTree('.').then(fromCache).then(toCache).then(pruneModuleTree).then(generateConfig);
 };
 
-// traceModuleTree('.')
-//     // .then(fromCache)
-//     // .then(toCache)
-//     .then(pruneModuleTree)
-//     .then(generateConfig)
-//     .then(res => console.log(res))
+// exports.getConfig(['fractal-core'])
+//   .then(res => console.log(res))
 
 },{"./asyncFns":2,"./fs":3,"./path":9,"es6-promise":5,"isomorphic-fetch":6,"lodash":7}],5:[function(require,module,exports){
 (function (process,global){

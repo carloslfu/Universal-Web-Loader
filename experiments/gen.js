@@ -6,6 +6,7 @@ const path = require('./path')
 const fs = require('./fs')
 const { filterAsync } = require('./asyncFns')
 const _ = require('lodash')
+const {convertPackage} = require('./node-conversion')
 
 const nodeCoreModules = [
     'assert',
@@ -51,7 +52,6 @@ const nodeCoreModules = [
 const getDirectories = (srcpath) => {
   return fs.list(srcpath)
     .then(x => {
-      debugger
       return Promise.resolve(x)
     })
     .then(
@@ -79,9 +79,8 @@ const getDirectories = (srcpath) => {
  * @param dir
  * @returns {Promise.<TResult>}
  */
-const getPackageConfig = dir => {
-  dir = !dir || dir === '.' ? 'package.json' : path.join('node_modules', dir, 'package.json')
-  return fs.read(dir)
+const getPackageConfig = (dir) => {
+  return fs.read(path.join(dir, 'package.json'))
     .then(JSON.parse)
     // Pad it with defaults
     .then(config => Object.assign({
@@ -93,72 +92,90 @@ const getPackageConfig = dir => {
     .catch(() => null)
 }
 
-/**
- * Return the dependencies that live in the first level of node_modules
- * @param packageDir
- * @returns {Promise.<TResult>}
- */
-const getOwnDeps = packageDir => {
-  const node_modules = path.join('node_modules', packageDir === '.' || !packageDir ? '' : packageDir)
-  debugger
+const getOwnDeps = (packageDir) => {
+  const node_modules = path.join(packageDir, 'node_modules')
+
   return getDirectories(node_modules)
-    // Map directories to their package.json
-    .then(dirs => Promise.all(dirs.map(dir => getPackageConfig(path.join(packageDir, dir)))))
-    // Filter out anything that wasn't a package
-    .then(configs => configs.filter((v, k) => v))
-    .catch(err => {
-      // console.log(err)
-      return []
-    })
+      // Map directories to their package.json
+      .then(dirs => Promise.all(dirs.map(dir => getPackageConfig(path.join(packageDir, 'node_modules', dir)))))
+      // Filter out anything that wasn't a package
+      .then(configs => configs.filter((v, k) => v))
+
+      .catch(err => {
+          // console.log(err)
+          return []
+      })
 }
 
 /**
- * Trace the full node_modules tree, and build up a registry on the way.
- *
- * Registry is of the form:
- * {
- *    'lodash@1.1.2': {
- *      name: 'lodash',
- *      config: <the package.json file>,
- *      key: 'lodash@1.1.2',
- *      location: 'node_modules/lodash'
- *    },
- *    ...
- * }
- *
- * Returned Tree is of the form:
- * [
- *    {
- *      name: 'react',
- *      version: '15.4.1',
- *      deps: <tree, like this one>
- *    },
- *    ...
- * ]
- *
- *
- * @param directory
- * @param name
- * @param version
- * @param registry
- * @returns {Promise.<{tree: *, registry: Array}>}
- */
-const traceModules = (name = false, version = false, registry = {}) => {
-  debugger
-  return getOwnDeps(name)
-    .then(ownDeps => {
-      ownDeps.forEach((dep => {
-        const versionName = dep.name + '@' + dep.version
-        registry[versionName] = {
-            name: dep.name,
-            config: dep,
-            key: versionName,
-            location: path.join(name, 'node_modules', dep.name)
-        }
-      }))
-      return ownDeps
-    })
-    .then(tree => ({tree, registry}))
+* Trace the full node_modules tree, and build up a registry on the way.
+*
+* Registry is of the form:
+* {
+*    'lodash@1.1.2': {
+*      name: 'lodash',
+*      config: <the package.json file>,
+*      key: 'lodash@1.1.2',
+*      location: 'node_modules/lodash'
+*    },
+*    ...
+* }
+*
+* Returned Tree is of the form:
+* [
+*    {
+*      name: 'react',
+*      version: '15.4.1',
+*      deps: <tree, like this one>
+*    },
+*    ...
+* ]
+*
+*
+* @param directory
+* @param name
+* @param version
+* @param registry
+* @returns {Promise.<{tree: *, registry: Array}>}
+*/
+const traceModuleTree = (directory, name = false, version = false, registry = {}) => {
+
+  return Promise.resolve({name, version})
+  // Resolve the package.json and set name and version from there if either is not specified
+      .then(({name, version}) => (!name || !version) ? getPackageConfig(directory) : {name, version})
+
+      .then(({name, version}) => (
+
+          // Get the dependencies in node_modules
+          getOwnDeps(directory)
+
+          // Merge package { name@version : package.json } into the registry
+              .then(ownDeps => {
+                  // console.log(ownDeps)
+                  ownDeps.forEach((dep => {
+                      const versionName = dep.name + '@' + dep.version
+                      registry[versionName] = {
+                          name: dep.name,
+                          config: dep,
+                          key: versionName,
+                          location: path.join(directory, 'node_modules', dep.name)
+                      }
+                  }))
+                  return ownDeps
+              })
+
+              .then(ownDeps => {
+                  // map each package.json to it's own tree
+                  return Promise.all(ownDeps.map(({name, version}) => {
+                      return traceModuleTree(path.join(directory, 'node_modules', name), name, version, registry)
+                      // Drop the registry
+                          .then(({tree, registry}) => tree)
+                      // map the module and its dep list to a tree entry
+                  })).then(deps => ({name, deps, version: version}))
+              })
+
+              .then(tree => ({tree, registry}))
+      ))
 }
 
 /**
@@ -186,6 +203,50 @@ const objectify = (key, array) => {
         return obj
     }, {})
 }
+
+/**
+ * Given a registry of package.json files, use jspm/npm to augment them to be SystemJS compatible
+ * @param registry
+ * @returns {Promise.<TResult>}
+ */
+const augmentRegistry = (registry) => {
+  return Promise.all(Object.keys(registry)
+      .map(key => {
+          const depMap = registry[key]
+
+          // Don't augment things that already have been (from the cache)
+          let shouldAugment = !depMap.augmented
+
+          // Don't augment things that specify config.jspmPackage
+          if (depMap.config.jspmPackage != undefined && depMap.config.jspmPackage)
+              shouldAugment = false
+
+          // Don't augment things that specify config.jspmNodeConversion == false
+          if (depMap.config.jspmNodeConversion !== undefined && !depMap.config.jspmNodeConversion)
+              shouldAugment = false
+
+          // Don't augment things that specify config.jspm.jspmNodeConversion == false
+          if (depMap.config.jspm !== undefined
+              && depMap.config.jspm.jspmNodeConversion !== undefined
+              && !depMap.config.jspm.jspmNodeConversion)
+              shouldAugment = false
+
+          // Augment the package.json
+          return shouldAugment ?
+              convertPackage(depMap.config, ':' + key, './' + depMap.location)
+                  .then(config => Object.assign(depMap, {config, augmented: true}))
+                  .catch(e => console.error(e)) :
+              depMap
+      }))
+      .then(objectify.bind(null, 'key'))
+}
+
+/**
+ * Convenience method to allow easy chaining
+ * @param tree
+ * @param registry
+ */
+const augmentModuleTree = ({tree, registry}) => augmentRegistry(registry).then(registry => ({tree, registry}))
 
 /**
  * Only keep keys we are interested in for package config generation
@@ -386,12 +447,25 @@ const downloadDir = async (name) => {
       await downloadDir(`${filePath}`, 'node_modules')
     }
   }))
+  if (name.indexOf('/') === -1) {
+    // Download dependencies
+    let pkgJSON = JSON.parse(await fs.read(path.join('node_modules', name, 'package.json')))
+    await Promise.all(Object.keys(pkgJSON.dependencies || {}).map(downloadDir))
+  }
 }
+
+exports.fs = fs
 
 exports.getConfig =  async deps => {
 
   const mainPkg = {
-    dependencies: {},
+    name: 'npm',
+    version: '1.0.0',
+    description: '',
+    main: 'index.js',
+    author: '',
+    license: 'ISC',
+    dependencies: {}
   }
 
   await Promise.all(deps.map(async dep => {
@@ -402,13 +476,22 @@ exports.getConfig =  async deps => {
   }))
   await fs.write('package.json', JSON.stringify(mainPkg, null, 2))
 
-  return traceModules('.')
+  return traceModuleTree('.')
     // .then(fromCache)
+    // .then(augmentModuleTree)
     // .then(toCache)
     // .then(pruneModuleTree)
     // .then(generateConfig)
 
 }
 
-exports.getConfig(['fractal-core'])
-  .then(res => console.log(res))
+exports.getConfig(['left-pad'])
+  // .then(res => console.log(res))
+  .then(config => require('fs').writeFileSync('config.json', JSON.stringify(config, null, 2)))
+
+// traceModuleTree('.')
+//   .then(fromCache)
+//   .then(toCache)
+//   .then(pruneModuleTree)
+//   .then(generateConfig)
+//   .then(res => console.log(JSON.stringify(res, null, 2)))

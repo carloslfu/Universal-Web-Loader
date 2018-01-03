@@ -1,0 +1,639 @@
+{
+  "tree": {
+    "name": "npm",
+    "deps": [
+      {
+        "name": "@types/core-js",
+        "deps": [],
+        "version": "0.9.44"
+      },
+      {
+        "name": "@types/node",
+        "deps": [],
+        "version": "8.5.2"
+      },
+      {
+        "name": "balanced-match",
+        "deps": [],
+        "version": "1.0.0"
+      },
+      {
+        "name": "brace-expansion",
+        "deps": [],
+        "version": "1.1.8"
+      },
+      {
+        "name": "browser-split",
+        "deps": [],
+        "version": "0.0.1"
+      },
+      {
+        "name": "concat-map",
+        "deps": [],
+        "version": "0.0.1"
+      },
+      {
+        "name": "deep-equal",
+        "deps": [],
+        "version": "1.0.1"
+      },
+      {
+        "name": "deepmerge",
+        "deps": [],
+        "version": "1.5.2"
+      },
+      {
+        "name": "fractal-core",
+        "deps": [],
+        "version": "4.3.8"
+      },
+      {
+        "name": "free-style",
+        "deps": [],
+        "version": "2.5.1"
+      },
+      {
+        "name": "fs-jetpack",
+        "deps": [],
+        "version": "1.2.0"
+      },
+      {
+        "name": "lodash.escape",
+        "deps": [],
+        "version": "4.0.1"
+      },
+      {
+        "name": "lodash.forown",
+        "deps": [],
+        "version": "4.4.0"
+      },
+      {
+        "name": "lodash.kebabcase",
+        "deps": [],
+        "version": "4.1.1"
+      },
+      {
+        "name": "lodash.remove",
+        "deps": [],
+        "version": "4.7.0"
+      },
+      {
+        "name": "lodash.uniq",
+        "deps": [],
+        "version": "4.5.0"
+      },
+      {
+        "name": "minimatch",
+        "deps": [],
+        "version": "3.0.4"
+      },
+      {
+        "name": "object-assign",
+        "deps": [],
+        "version": "4.1.1"
+      },
+      {
+        "name": "parse-sel",
+        "deps": [],
+        "version": "1.0.0"
+      },
+      {
+        "name": "setimmediate",
+        "deps": [],
+        "version": "1.0.5"
+      },
+      {
+        "name": "snabbdom",
+        "deps": [],
+        "version": "0.7.1"
+      },
+      {
+        "name": "typestyle",
+        "deps": [],
+        "version": "1.5.1"
+      }
+    ],
+    "version": "1.0.0"
+  },
+  "registry": {
+    "@types/core-js@0.9.44": {
+      "name": "@types/core-js",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "format": "cjs"
+      },
+      "key": "@types/core-js@0.9.44",
+      "location": "node_modules/@types/core-js",
+      "augmented": true
+    },
+    "@types/node@8.5.2": {
+      "name": "@types/node",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "format": "cjs"
+      },
+      "key": "@types/node@8.5.2",
+      "location": "node_modules/@types/node",
+      "augmented": true
+    },
+    "balanced-match@1.0.0": {
+      "name": "balanced-match",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "balanced-match@1.0.0",
+      "location": "node_modules/balanced-match",
+      "augmented": true
+    },
+    "brace-expansion@1.1.8": {
+      "name": "brace-expansion",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "brace-expansion@1.1.8",
+      "location": "node_modules/brace-expansion",
+      "augmented": true
+    },
+    "browser-split@0.0.1": {
+      "name": "browser-split",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "browser-split@0.0.1",
+      "location": "node_modules/browser-split",
+      "augmented": true
+    },
+    "concat-map@0.0.1": {
+      "name": "concat-map",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "concat-map@0.0.1",
+      "location": "node_modules/concat-map",
+      "augmented": true
+    },
+    "deep-equal@1.0.1": {
+      "name": "deep-equal",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          },
+          "test/*": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "deep-equal@1.0.1",
+      "location": "node_modules/deep-equal",
+      "augmented": true
+    },
+    "deepmerge@1.5.2": {
+      "name": "deepmerge",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          },
+          "dist/es.js": {
+            "format": "esm"
+          },
+          "rollup.config.js": {
+            "format": "esm"
+          }
+        },
+        "map": {
+          "./dist/umd.js": {
+            "browser": "./dist/cjs.js"
+          }
+        },
+        "main": "dist/umd.js",
+        "format": "cjs"
+      },
+      "key": "deepmerge@1.5.2",
+      "location": "node_modules/deepmerge",
+      "augmented": true
+    },
+    "fractal-core@4.3.8": {
+      "name": "fractal-core",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          },
+          "core/index.d.ts": {
+            "format": "esm"
+          },
+          "utils/index.d.ts": {
+            "format": "esm"
+          }
+        },
+        "map": {
+          "./core": "./core/index.js",
+          "./interfaces/view": "./interfaces/view/index.js",
+          "./toHTML": "./toHTML/index.js",
+          "./toHTML/modules": "./toHTML/modules/index.js",
+          "./utils": "./utils/index.js"
+        },
+        "main": "core/index.js",
+        "format": "cjs"
+      },
+      "key": "fractal-core@4.3.8",
+      "location": "node_modules/fractal-core",
+      "augmented": true
+    },
+    "free-style@2.5.1": {
+      "name": "free-style",
+      "config": {
+        "meta": {
+          "*": {
+            "globals": {
+              "process": "process"
+            }
+          },
+          "*.json": {
+            "format": "json"
+          },
+          "dist.es2015/free-style.js": {
+            "format": "esm"
+          }
+        },
+        "main": "dist/free-style.js",
+        "format": "cjs"
+      },
+      "key": "free-style@2.5.1",
+      "location": "node_modules/free-style",
+      "augmented": true
+    },
+    "fs-jetpack@1.2.0": {
+      "name": "fs-jetpack",
+      "config": {
+        "meta": {
+          "*": {
+            "globals": {
+              "process": "process"
+            }
+          },
+          "*.json": {
+            "format": "json"
+          },
+          "benchmark/utils.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "lib/utils/validate.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "lib/write.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "spec/append.spec.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "spec/assert_path.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "spec/file.spec.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "spec/read.spec.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "spec/utils/validate.spec.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          },
+          "spec/write.spec.js": {
+            "globals": {
+              "Buffer": "buffer/global"
+            }
+          }
+        },
+        "main": "main.js",
+        "format": "cjs"
+      },
+      "key": "fs-jetpack@1.2.0",
+      "location": "node_modules/fs-jetpack",
+      "augmented": true
+    },
+    "lodash.escape@4.0.1": {
+      "name": "lodash.escape",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "lodash.escape@4.0.1",
+      "location": "node_modules/lodash.escape",
+      "augmented": true
+    },
+    "lodash.forown@4.4.0": {
+      "name": "lodash.forown",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "lodash.forown@4.4.0",
+      "location": "node_modules/lodash.forown",
+      "augmented": true
+    },
+    "lodash.kebabcase@4.1.1": {
+      "name": "lodash.kebabcase",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "lodash.kebabcase@4.1.1",
+      "location": "node_modules/lodash.kebabcase",
+      "augmented": true
+    },
+    "lodash.remove@4.7.0": {
+      "name": "lodash.remove",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "lodash.remove@4.7.0",
+      "location": "node_modules/lodash.remove",
+      "augmented": true
+    },
+    "lodash.uniq@4.5.0": {
+      "name": "lodash.uniq",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "lodash.uniq@4.5.0",
+      "location": "node_modules/lodash.uniq",
+      "augmented": true
+    },
+    "minimatch@3.0.4": {
+      "name": "minimatch",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "minimatch.js",
+        "format": "cjs"
+      },
+      "key": "minimatch@3.0.4",
+      "location": "node_modules/minimatch",
+      "augmented": true
+    },
+    "object-assign@4.1.1": {
+      "name": "object-assign",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "object-assign@4.1.1",
+      "location": "node_modules/object-assign",
+      "augmented": true
+    },
+    "parse-sel@1.0.0": {
+      "name": "parse-sel",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "index.js",
+        "format": "cjs"
+      },
+      "key": "parse-sel@1.0.0",
+      "location": "node_modules/parse-sel",
+      "augmented": true
+    },
+    "setimmediate@1.0.5": {
+      "name": "setimmediate",
+      "config": {
+        "meta": {
+          "*": {
+            "globals": {
+              "process": "process"
+            }
+          },
+          "*.json": {
+            "format": "json"
+          }
+        },
+        "main": "setImmediate.js",
+        "format": "cjs"
+      },
+      "key": "setimmediate@1.0.5",
+      "location": "node_modules/setimmediate",
+      "augmented": true
+    },
+    "snabbdom@0.7.1": {
+      "name": "snabbdom",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          },
+          "dist/h.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-attributes.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-class.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-dataset.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-eventlisteners.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-patch.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-props.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom-style.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/snabbdom.js": {
+            "cjsRequireDetection": false
+          },
+          "dist/tovnode.js": {
+            "cjsRequireDetection": false
+          },
+          "es/h.js": {
+            "format": "esm"
+          },
+          "es/helpers/attachto.js": {
+            "format": "esm"
+          },
+          "es/htmldomapi.js": {
+            "format": "esm"
+          },
+          "es/is.js": {
+            "format": "esm"
+          },
+          "es/modules/attributes.js": {
+            "format": "esm"
+          },
+          "es/modules/class.js": {
+            "format": "esm"
+          },
+          "es/modules/dataset.js": {
+            "format": "esm"
+          },
+          "es/modules/eventlisteners.js": {
+            "format": "esm"
+          },
+          "es/modules/hero.js": {
+            "format": "esm"
+          },
+          "es/modules/props.js": {
+            "format": "esm"
+          },
+          "es/modules/style.js": {
+            "format": "esm"
+          },
+          "es/snabbdom.bundle.js": {
+            "format": "esm"
+          },
+          "es/snabbdom.js": {
+            "format": "esm"
+          },
+          "es/thunk.js": {
+            "format": "esm"
+          },
+          "es/tovnode.js": {
+            "format": "esm"
+          },
+          "es/vnode.js": {
+            "format": "esm"
+          },
+          "examples/carousel-svg/build.js": {
+            "cjsRequireDetection": false
+          },
+          "examples/hero/build.js": {
+            "cjsRequireDetection": false
+          },
+          "examples/reorder-animation/build.js": {
+            "cjsRequireDetection": false
+          },
+          "examples/svg/build.js": {
+            "cjsRequireDetection": false
+          }
+        },
+        "main": "snabbdom.js",
+        "format": "cjs"
+      },
+      "key": "snabbdom@0.7.1",
+      "location": "node_modules/snabbdom",
+      "augmented": true
+    },
+    "typestyle@1.5.1": {
+      "name": "typestyle",
+      "config": {
+        "meta": {
+          "*.json": {
+            "format": "json"
+          },
+          "lib.es2015/index.js": {
+            "format": "esm"
+          },
+          "lib.es2015/internal/*": {
+            "format": "esm"
+          }
+        },
+        "map": {
+          "./lib": "./lib/index.js"
+        },
+        "main": "lib/index.js",
+        "format": "cjs"
+      },
+      "key": "typestyle@1.5.1",
+      "location": "node_modules/typestyle",
+      "augmented": true
+    }
+  }
+}

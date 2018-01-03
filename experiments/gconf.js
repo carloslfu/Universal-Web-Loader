@@ -248,6 +248,11 @@ const augmentRegistry = (registry) => {
             // Augment the package.json
             return shouldAugment ?
                 convertPackage(depMap.config, ':' + key, './' + depMap.location, console)
+                    .then(c => {
+                      debugger
+                      console.log(c)
+                      return Promise.resolve(c)
+                    })
                     .then(config => Object.assign(depMap, {config, augmented: true}))
                     .catch(log) :
                 depMap
@@ -449,10 +454,9 @@ const log = x => {
 }
 
 traceModuleTree('.')
-    .then(fromCache)
-    // .then(augmentModuleTree)
-    .then(log)
-    .then(toCache)
+    // .then(fromCache)
+    .then(augmentModuleTree)
+    // .then(toCache)
     .then(pruneModuleTree)
-    .then(generateConfig)
-    .then(config => fs.writeFileSync('config.js', `const conf = ${JSON.stringify(config, null, 2)}`))
+    .then(config => fs.writeFileSync('config.json', JSON.stringify(config, null, 2)))
+    // .then(generateConfig)
