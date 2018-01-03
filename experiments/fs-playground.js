@@ -1,6 +1,7 @@
 var fs = require('./fs')
 var path = require('./path')
 var readdirp = require('./readdirp')
+// var readdirp = require('readdirp')
 
 ;(async () => {
   for (let name of ['a', 'b', 'c', 'd']) {
@@ -11,14 +12,13 @@ var readdirp = require('./readdirp')
       await fs.write(`${dir}/${name}.js`, name)
     }
   }
-  console.log(await fs.list())
-  console.log(fs.files.kv)
-
   let fileTree = []
   await new Promise((resolve, reject) => readdirp({
-    root: 'app',
+    root: '.',
     entryType: 'both',
   }, function(entry) {
+    console.log(entry)
+    console.log()
     var listingName = entry.path.replace(/\\/g, '/');
     if (entry.stat.dir)
       listingName += '/';

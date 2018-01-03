@@ -111,7 +111,9 @@ exports.normalize = function(path) {
     path += '/';
   }
 
-  return (isAbsolute ? '/' : '') + path;
+  return path;
+  // --- Node version
+  // return (isAbsolute ? '/' : '') + path;
 };
 
 // posix version

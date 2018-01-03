@@ -133,7 +133,6 @@ const createPathAddStats = async (pathName, stat) => {
   for (let i = 0, part, str = ''; part = parts[i]; i++) {
     str += (i === 0 ? '' : '/') + part
     let dir = await files.get(str)
-    console.log()
     await files.set(str, {
       ...dir,
       size: dir ? dir.size + stat.size : stat.size,
@@ -149,13 +148,13 @@ exports.delete = async (name, obj) => {
 
 exports.list = async name => {
   let fileNames = await files.keys()
-  let normName
-  if (name) {
-    normName = path.normalize(name)
+  let normName = name ? path.normalize(name) : ''
+  if (normName === '.') {
+    normName = ''
   }
   return fileNames
-    .filter(n => name ? n.startsWith(normName + '/') : true)
-    .map(n => name ? n.slice(normName.length + 1) : n)
+    .filter(n => normName ? n.startsWith(normName + '/') : true)
+    .map(n => normName ? n.slice(normName.length + 1) : n)
     .filter(n => n.indexOf('/') === - 1)
 }
 
@@ -170,4 +169,4 @@ exports.exists = async name => {
   return fileNames.indexOf(normName) !== -1
 }
 
-exports.realpath = async path => path
+exports.realpath = async path => '/' + path
