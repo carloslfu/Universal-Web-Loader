@@ -47,23 +47,10 @@ async function readdir(opts, callback1, callback2) {
     ;
 
   // If no callbacks were given we will use a streaming interface
-  if (isUndefined(callback1)) {
-    var api          =  require('./stream-api')();
-    stream           =  api.stream;
-    callback1        =  api.processEntry;
-    callback2        =  api.done;
-    handleError      =  api.handleError;
-    handleFatalError =  api.handleFatalError;
-
-    stream.on('close', function () { aborted = true; });
-    stream.on('pause', function () { paused = true; });
-    stream.on('resume', function () { paused = false; });
-  } else {
-    handleError      =  function (err) { errors.push(err); };
-    handleFatalError =  function (err) {
-      handleError(err);
-      allProcessed(errors, null);
-    };
+  handleError      =  function (err) { errors.push(err); };
+  handleFatalError =  function (err) {
+    handleError(err);
+    allProcessed(errors, null);
   }
 
   if (isUndefined(opts)){
@@ -72,7 +59,6 @@ async function readdir(opts, callback1, callback2) {
       'https://github.com/thlorenz/readdirp#options'
       )
     );
-    return stream;
   }
 
   opts.root            =  opts.root            || '.';
@@ -247,7 +233,6 @@ async function readdir(opts, callback1, callback2) {
   } catch (err) {
     // if we detect illegal filters, bail out immediately
     handleFatalError(err);
-    return stream;
   }
 
   // If filters were valid get on with the show
@@ -262,7 +247,6 @@ async function readdir(opts, callback1, callback2) {
     }
   });
 
-  return stream;
 }
 
 module.exports = readdir

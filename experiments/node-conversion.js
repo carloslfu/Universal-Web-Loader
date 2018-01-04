@@ -88,7 +88,7 @@ exports.convertPackage = function(packageConfig, packageName, packageDir, ui) {
       }
     }, function(entry) {
       var listingName = entry.path.replace(/\\/g, '/');
-      if (entry.stat.isDirectory())
+      if (entry.stat.dir)
         listingName += '/';
       fileTree[listingName] = true;
     }, function(err) {
@@ -221,7 +221,7 @@ exports.convertPackage = function(packageConfig, packageName, packageDir, ui) {
         if (fileFormat)
           return;
 
-        return asp(fs.readFile)(filePath)
+        return fs.read(filePath)
         .then(function(source) {
           fileSource = source.toString();
 
@@ -250,7 +250,7 @@ exports.convertPackage = function(packageConfig, packageName, packageDir, ui) {
         }
 
         // cjs -> parse the source for requires and see if it uses Buffer
-        return Promise.resolve(fileSource || asp(fs.readFile)(filePath))
+        return Promise.resolve(fileSource || fs.read(filePath))
         .then(function(source) {
           var parsed = parseCJS(source.toString(), !meta || !meta['*'] || !meta['*'].globals || !meta['*'].globals.process);
 

@@ -8,13 +8,6 @@ function traceurGet (module) {
 var ParseTreeTransformer = traceurGet('codegeneration/ParseTreeTransformer.js').ParseTreeTransformer;
 var ScopeTransformer = traceurGet('codegeneration/ScopeTransformer.js').ScopeTransformer;
 
-
-var Script = traceurGet('syntax/trees/ParseTrees.js').Script;
-var parseStatements = traceurGet('codegeneration/PlaceholderParser.js').parseStatements;
-var STRING = traceurGet('syntax/TokenType.js').STRING;
-var LiteralExpression = traceurGet('syntax/trees/ParseTrees.js').LiteralExpression;
-var LiteralToken = traceurGet('syntax/LiteralToken.js').LiteralToken;
-
 // format detection regexes
 var leadingCommentAndMetaRegEx = /^\s*(\/\*[^\*]*(\*(?!\/)[^\*]*)*\*\/|\s*\/\/[^\n]*|\s*"[^"]+"\s*;?|\s*'[^']+'\s*;?)*\s*/;
 var cjsRequireRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF."'])require\s*\(\s*("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')\s*\)/g;
